@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+tarix_storage.db-journal
+images/*_base.jpg

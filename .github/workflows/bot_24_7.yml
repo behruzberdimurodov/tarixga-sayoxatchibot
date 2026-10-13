@@ -1,0 +1,52 @@
+name: Tarixga Sayoxatchibot 24/7 Cloud Service
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+  schedule:
+    # Har 5 soatda yangi oqimni avtomatik ishga tushiradi (24/7 uzluksiz ishlash uchun)
+    - cron: '0 */5 * * *'
+
+concurrency:
+  group: tarixga-sayoxatchibot-24-7
+  cancel-in-progress: true
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  run-bot-24-7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: 📥 Kodni yuklab olish (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12 o'rnatish
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Kutubxonalarni o'rnatish
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🖼️ Tarixiy kartochkalar va rasmlarni tayyorlash
+        run: |
+          python download_images.py || true
+
+      - name: 🚀 Tarixga Sayoxatchibotni 24/7 ishga tushirish (5.5 soatlik sikl)
+        continue-on-error: true
+        run: |
+          timeout 19800s python -X utf8 bot.py || true
+
+      - name: 🔄 Keyingi 24/7 siklni avtomatik yoqish (Auto-Restart Loop)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "bot_24_7.yml" --ref ${{ github.ref_name }} || true
