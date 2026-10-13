@@ -1118,8 +1118,9 @@ def run_bot():
 
     try:
         from keep_alive import start_keep_alive_server
-        start_keep_alive_server(8081)
-        logger.info("🌐 Keep-Alive HTTP server ishga tushdi (port 8081)")
+        port = int(os.environ.get("PORT", 8081))
+        start_keep_alive_server(port)
+        logger.info(f"🌐 Keep-Alive HTTP server ishga tushdi (port {port})")
     except Exception as e:
         logger.warning(f"Keep-alive server ogohlantirish: {e}")
 
